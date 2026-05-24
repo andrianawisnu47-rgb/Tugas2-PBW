@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stok Bahan Ajar — SITTA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface2: #eeecea;
+      --border: #e0ddd8;
+      --accent: #1a3a5c;
+      --accent2: #2a5f8f;
+      --accent-light: #e8f0f8;
+      --text: #1c1c1e;
+      --muted: #6b6b72;
+      --green: #1e5c3a;
+      --green-bg: #e6f5ee;
+      --orange: #b85c00;
+      --orange-bg: #fff3e6;
+      --red: #8b1a1a;
+      --red-bg: #fdeaea;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 32px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 3px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .time-chip { font-size: 12px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-family: 'Space Mono', monospace; }
+    .back-btn { font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* MAIN */
+    .main { max-width: 1280px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 28px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .page-title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; color: var(--text); line-height: 1.2; }
+    .page-title span { color: var(--accent2); }
+    .page-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .btn-primary { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: background 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; }
+    .btn-primary:hover { background: var(--accent2); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #f5c6c6; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s; }
+    .btn-danger:hover { background: #fbd5d5; }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
+    .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .stat-value { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* FILTER PANEL */
+    .filter-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; }
+    .filter-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+    .filter-title { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; min-width: 160px; }
+    .filter-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .filter-select, .filter-input {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 7px 11px; font-size: 13px; color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif; outline: none; transition: border-color 0.2s;
+      min-width: 160px;
+    }
+    .filter-select:focus, .filter-input:focus { border-color: var(--accent2); }
+    .filter-divider { width: 1px; height: 36px; background: var(--border); align-self: flex-end; }
+
+    /* CHECKBOX FILTERS */
+    .check-group { display: flex; flex-direction: column; gap: 6px; }
+    .check-item { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12.5px; color: var(--text); }
+    .check-item input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; }
+
+    /* SORT ROW */
+    .sort-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .sort-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .sort-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text); transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; gap: 4px; }
+    .sort-btn.active { background: var(--accent-light); border-color: var(--accent2); color: var(--accent); font-weight: 700; }
+    .sort-btn:hover:not(.active) { border-color: var(--muted); }
+
+    /* RESULT INFO */
+    .result-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .result-count { font-size: 12.5px; color: var(--muted); }
+    .result-count strong { color: var(--text); font-weight: 700; }
+
+    /* TABLE */
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
+    thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+    thead th { padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #faf9f7; }
+    tbody td { padding: 11px 14px; vertical-align: middle; }
+    .td-code { font-family: 'Space Mono', monospace; font-size: 11.5px; color: var(--accent2); font-weight: 700; white-space: nowrap; }
+    .td-name { font-weight: 600; color: var(--text); max-width: 220px; line-height: 1.4; }
+    .td-num { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 14px; }
+    .tag { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
+    .tag-blue { background: var(--accent-light); color: var(--accent); }
+    .tag-green { background: var(--green-bg); color: var(--green); }
+    .tag-purple { background: #f0e8f8; color: #3a1a5c; }
+    .tag-orange { background: var(--orange-bg); color: var(--orange); }
+
+    /* STATUS BADGE */
+    .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .status-aman { background: var(--green-bg); color: var(--green); }
+    .status-menipis { background: var(--orange-bg); color: var(--orange); }
+    .status-kosong { background: var(--red-bg); color: var(--red); }
+
+    /* ACTIONS */
+    .action-btns { display: flex; gap: 6px; }
+    .btn-edit { background: var(--accent-light); color: var(--accent); border: 1px solid #c8dff0; border-radius: 7px; padding: 5px 11px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.15s; }
+    .btn-edit:hover { background: #cfe3f5; }
+
+    /* NOTE HTML */
+    .note-cell { max-width: 160px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .note-cell a { color: var(--accent2); text-decoration: underline; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 60px 24px; color: var(--muted); }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-text { font-size: 14px; font-weight: 500; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+      z-index: 200; display: flex; align-items: center; justify-content: center;
+      padding: 20px; animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: var(--surface); border-radius: 18px; width: 100%; max-width: 560px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.18);
+      animation: slideUp 0.25s cubic-bezier(.22,.68,0,1.2);
+    }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-header { padding: 22px 24px 0; display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 17px; font-weight: 800; color: var(--text); }
+    .modal-close { background: var(--surface2); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: background 0.2s; }
+    .modal-close:hover { background: var(--border); }
+    .modal-body { padding: 20px 24px 24px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .form-label .req { color: #c0392b; margin-left: 2px; }
+    .form-input, .form-select, .form-textarea {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 9px; padding: 9px 12px;
+      font-size: 13.5px; color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      outline: none; transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent2); }
+    .form-input.error, .form-select.error, .form-textarea.error { border-color: #c0392b; background: #fff8f8; }
+    .form-error { font-size: 11.5px; color: #c0392b; font-weight: 500; }
+    .form-textarea { resize: vertical; min-height: 70px; }
+    .modal-footer { padding: 0 24px 22px; display: flex; gap: 10px; justify-content: flex-end; }
+    .section-divider { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin: 16px 0 12px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+
+    /* REORDER ALERT BANNER */
+    .alert-banner { background: #fff8e1; border: 1px solid #ffd54f; border-radius: 10px; padding: 11px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #7a5800; font-weight: 500; }
+
+    @media (max-width: 700px) {
+      .topbar { padding: 0 16px; }
+      .main { padding: 24px 14px 60px; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="logo"><div class="logo-dot"></div>SITTA</div>
+    <div class="topbar-right">
+      <div class="time-chip">{{ clock }}</div>
+      <a href="index.html" class="back-btn">← Beranda</a>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Stok <span>Bahan Ajar</span></div>
+        <div class="page-sub">Kelola inventaris bahan ajar seluruh UT-Daerah</div>
+      </div>
+      <button class="btn-primary" @click="openAddModal">＋ Tambah Bahan Ajar</button>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Item</div>
+        <div class="stat-value">{{ data.length }}</div>
+        <div class="stat-sub">bahan ajar terdaftar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" style="color:var(--green)">✔ Aman</div>
+        <div class="stat-value" style="color:var(--green)">{{ countAman }}</div>
+        <div class="stat-sub">stok mencukupi</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" style="color:var(--orange)">⚠ Menipis</div>
+        <div class="stat-value" style="color:var(--orange)">{{ countMenipis }}</div>
+        <div class="stat-sub">di bawah safety stock</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" style="color:var(--red)">✕ Kosong</div>
+        <div class="stat-value" style="color:var(--red)">{{ countKosong }}</div>
+        <div class="stat-sub">perlu re-order</div>
+      </div>
+    </div>
+
+    <!-- REORDER ALERT -->
+    <div class="alert-banner" v-if="countKosong + countMenipis > 0">
+      ⚠️ Terdapat <strong>&nbsp;{{ countKosong + countMenipis }}&nbsp;</strong> item yang perlu perhatian (kosong atau menipis). Gunakan filter "Re-Order" untuk menampilkannya.
+    </div>
+
+    <!-- FILTER PANEL -->
+    <div class="filter-panel">
+      <div class="filter-top">
+        <div class="filter-title">🔍 Filter &amp; Urutkan</div>
+        <button class="btn-secondary" @click="resetFilter" style="padding:6px 13px;font-size:12px;">↺ Reset Filter</button>
+      </div>
+
+      <div class="filter-row">
+        <!-- UT-Daerah -->
+        <div class="filter-group">
+          <div class="filter-label">UT-Daerah</div>
+          <select class="filter-select" v-model="filterUpbjj" @change="filterKategori = ''">
+            <option value="">Semua UT-Daerah</option>
+            <option v-for="u in upbjjList" :key="u" :value="u">{{ u }}</option>
+          </select>
+        </div>
+
+        <!-- Kategori — dependent pada UT-Daerah -->
+        <div class="filter-group" v-if="filterUpbjj">
+          <div class="filter-label">Kategori Mata Kuliah</div>
+          <select class="filter-select" v-model="filterKategori">
+            <option value="">Semua Kategori</option>
+            <option v-for="k in filteredKategoriOptions" :key="k" :value="k">{{ k }}</option>
+          </select>
+        </div>
+
+        <!-- Pencarian judul/kode -->
+        <div class="filter-group">
+          <div class="filter-label">Cari</div>
+          <input class="filter-input" v-model="searchQuery" placeholder="Kode / Judul mata kuliah…" style="min-width:200px;"/>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <!-- Checkbox re-order -->
+        <div class="filter-group">
+          <div class="filter-label">Tampilkan</div>
+          <div class="check-group">
+            <label class="check-item">
+              <input type="checkbox" v-model="filterReorder"/>
+              ⚠️ Stok &lt; Safety (menipis/kosong)
+            </label>
+            <label class="check-item">
+              <input type="checkbox" v-model="filterKosongOnly"/>
+              🚨 Stok = 0 saja
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SORT ROW -->
+      <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+        <div class="sort-row">
+          <div class="sort-label">Urutkan:</div>
+          <button class="sort-btn" :class="{active: sortKey==='judul' && sortDir==='asc'}" @click="setSort('judul','asc')">Judul A–Z</button>
+          <button class="sort-btn" :class="{active: sortKey==='judul' && sortDir==='desc'}" @click="setSort('judul','desc')">Judul Z–A</button>
+          <button class="sort-btn" :class="{active: sortKey==='qty' && sortDir==='asc'}" @click="setSort('qty','asc')">Stok ↑</button>
+          <button class="sort-btn" :class="{active: sortKey==='qty' && sortDir==='desc'}" @click="setSort('qty','desc')">Stok ↓</button>
+          <button class="sort-btn" :class="{active: sortKey==='harga' && sortDir==='asc'}" @click="setSort('harga','asc')">Harga ↑</button>
+          <button class="sort-btn" :class="{active: sortKey==='harga' && sortDir==='desc'}" @click="setSort('harga','desc')">Harga ↓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT INFO -->
+    <div class="result-info">
+      <div class="result-count">Menampilkan <strong>{{ filteredData.length }}</strong> dari <strong>{{ data.length }}</strong> item</div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kode MK</th>
+            <th>Nama Mata Kuliah</th>
+            <th>Kategori</th>
+            <th>UT-Daerah</th>
+            <th>Lok. Rak</th>
+            <th>Stok</th>
+            <th>Safety</th>
+            <th>Status</th>
+            <th>Catatan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="filteredData.length === 0">
+            <td colspan="10">
+              <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <div class="empty-text">Tidak ada data yang sesuai filter</div>
+              </div>
+            </td>
+          </tr>
+          <tr v-for="item in filteredData" :key="item.id">
+            <td><div class="td-code">{{ item.kode }}</div></td>
+            <td><div class="td-name">{{ item.judul }}</div></td>
+            <td><span class="tag tag-blue">{{ item.kategori }}</span></td>
+            <td style="font-size:12.5px;white-space:nowrap;">{{ item.upbjj }}</td>
+            <td style="font-size:12.5px;font-family:'Space Mono',monospace;">{{ item.lokasiRak }}</td>
+            <td><div class="td-num" :style="item.qty === 0 ? 'color:var(--red)' : item.qty < item.safety ? 'color:var(--orange)' : 'color:var(--green)'">{{ item.qty }}</div></td>
+            <td><div class="td-num" style="color:var(--muted);font-size:12px;">{{ item.safety }}</div></td>
+            <td>
+              <span class="status-badge" :class="statusClass(item)">
+                {{ statusIcon(item) }} {{ statusLabel(item) }}
+              </span>
+            </td>
+            <td><div class="note-cell" v-html="item.catatanHTML || '—'"></div></td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-edit" @click="openEditModal(item)">✏ Edit</button>
+                <button class="btn-danger" @click="deleteItem(item.id)">✕</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- MODAL TAMBAH / EDIT -->
+  <div class="modal-overlay" v-if="showModal" @click.self="closeModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">{{ editMode ? '✏ Edit Bahan Ajar' : '＋ Tambah Bahan Ajar' }}</div>
+        <button class="modal-close" @click="closeModal">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="section-divider">Identitas Mata Kuliah</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">Kode MK <span class="req">*</span></div>
+            <input class="form-input" :class="{error: errors.kode}" v-model="form.kode" placeholder="cth. ADPU4130"/>
+            <div class="form-error" v-if="errors.kode">{{ errors.kode }}</div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Kategori <span class="req">*</span></div>
+            <select class="form-select" :class="{error: errors.kategori}" v-model="form.kategori">
+              <option value="">Pilih kategori…</option>
+              <option v-for="k in kategoriList" :key="k" :value="k">{{ k }}</option>
+            </select>
+            <div class="form-error" v-if="errors.kategori">{{ errors.kategori }}</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Nama / Judul Mata Kuliah <span class="req">*</span></div>
+          <input class="form-input" :class="{error: errors.judul}" v-model="form.judul" placeholder="cth. Administrasi Perkantoran"/>
+          <div class="form-error" v-if="errors.judul">{{ errors.judul }}</div>
+        </div>
+
+        <div class="section-divider">Lokasi &amp; Distribusi</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">UT-Daerah (UPBJJ) <span class="req">*</span></div>
+            <select class="form-select" :class="{error: errors.upbjj}" v-model="form.upbjj">
+              <option value="">Pilih UT-Daerah…</option>
+              <option v-for="u in upbjjList" :key="u" :value="u">{{ u }}</option>
+            </select>
+            <div class="form-error" v-if="errors.upbjj">{{ errors.upbjj }}</div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Lokasi Rak <span class="req">*</span></div>
+            <input class="form-input" :class="{error: errors.lokasiRak}" v-model="form.lokasiRak" placeholder="cth. A1-R3"/>
+            <div class="form-error" v-if="errors.lokasiRak">{{ errors.lokasiRak }}</div>
+          </div>
+        </div>
+
+        <div class="section-divider">Stok</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">Jumlah Stok (qty) <span class="req">*</span></div>
+            <input class="form-input" :class="{error: errors.qty}" v-model.number="form.qty" type="number" min="0" placeholder="0"/>
+            <div class="form-error" v-if="errors.qty">{{ errors.qty }}</div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Safety Stock <span class="req">*</span></div>
+            <input class="form-input" :class="{error: errors.safety}" v-model.number="form.safety" type="number" min="0" placeholder="0"/>
+            <div class="form-error" v-if="errors.safety">{{ errors.safety }}</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">Harga (Rp)</div>
+            <input class="form-input" v-model.number="form.harga" type="number" min="0" placeholder="0"/>
+          </div>
+        </div>
+
+        <div class="section-divider">Catatan</div>
+        <div class="form-group">
+          <div class="form-label">Catatan (HTML diperbolehkan)</div>
+          <textarea class="form-textarea" v-model="form.catatanHTML" placeholder="cth. Lihat <a href='#'>info stok</a>"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" @click="closeModal">Batal</button>
+        <button class="btn-primary" @click="submitForm">{{ editMode ? '💾 Simpan Perubahan' : '＋ Tambah' }}</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
+
+const upbjjList = [
+  'Jakarta', 'Surabaya', 'Makassar', 'Padang', 'Denpasar'
+];
+
+const kategoriList = [
+  'MK Wajib','MK Pilihan','Praktikum','Problem-Based'
+];
+
+const seedData = [
+  { id:1, kode:'EKMA4116', judul:'Pengantar Manajemen', kategori:'MK Wajib', upbjj:'UPBJJ-UT Jakarta', lokasiRak:'R1-A3', qty:28, safety:20, harga:65000, catatanHTML:'<em>Edisi 2024, cetak ulang</em>' },
+  { id:2, kode:'EKMA4115', judul:'Pengantar Akuntansi', kategori:'MK Wajib', upbjj:'UPBJJ-UT Jakarta', lokasiRak:'R2-A4', qty:7, safety:15, harga:60000, catatanHTML:'<strong>Cover baru</strong>' },
+  { id:3, kode:'BIOL4201', judul:'Biologi Umum (Praktikum)', kategori:'Praktikum', upbjj:'UPBJJ-UT Surabaya', lokasiRak:'R3-B2', qty:12, safety:10, harga:80000, catatanHTML:'Butuh <u>pendingin</u> untuk kit basah' },
+  { id:4, kode:'FISIP4001', judul:'Dasar-Dasar Sosiologi', kategori:'MK Pilihan', upbjj:'UPBJJ-UT Makassar', lokasiRak:'R2-C1', qty:2, safety:8, harga:55000, catatanHTML:'Stok <i>menipis</i>, prioritaskan reorder' },
+  
+];
+
+createApp({
+  setup() {
+    const data = ref(seedData.map(d => ({...d})));
+    const nextId = ref(seedData.length + 1);
+    const clock = ref('');
+
+    // FILTER STATE
+    const filterUpbjj = ref('');
+    const filterKategori = ref('');
+    const searchQuery = ref('');
+    const filterReorder = ref(false);
+    const filterKosongOnly = ref(false);
+
+    // SORT STATE
+    const sortKey = ref('judul');
+    const sortDir = ref('asc');
+
+    // MODAL STATE
+    const showModal = ref(false);
+    const editMode = ref(false);
+    const editId = ref(null);
+    const errors = ref({});
+    const form = ref(emptyForm());
+
+    function emptyForm() {
+      return { kode:'', judul:'', kategori:'', upbjj:'', lokasiRak:'', qty:0, safety:0, harga:0, catatanHTML:'' };
+    }
+
+    // CLOCK
+    let clockInterval;
+    function updateClock() {
+      const n = new Date();
+      clock.value = [n.getHours(), n.getMinutes(), n.getSeconds()].map(x => String(x).padStart(2,'0')).join(':');
+    }
+    onMounted(() => { updateClock(); clockInterval = setInterval(updateClock, 1000); });
+    onUnmounted(() => clearInterval(clockInterval));
+
+    // STATUS HELPERS
+    function statusClass(item) {
+      if (item.qty === 0) return 'status-kosong';
+      if (item.qty < item.safety) return 'status-menipis';
+      return 'status-aman';
+    }
+    function statusLabel(item) {
+      if (item.qty === 0) return 'Kosong';
+      if (item.qty < item.safety) return 'Menipis';
+      return 'Aman';
+    }
+    function statusIcon(item) {
+      if (item.qty === 0) return '🚨';
+      if (item.qty < item.safety) return '⚠️';
+      return '✅';
+    }
+
+    // COMPUTED STATS (no filter applied)
+    const countAman = computed(() => data.value.filter(d => d.qty >= d.safety && d.qty > 0).length);
+    const countMenipis = computed(() => data.value.filter(d => d.qty > 0 && d.qty < d.safety).length);
+    const countKosong = computed(() => data.value.filter(d => d.qty === 0).length);
+
+    // Dependent kategori options: only show kategori present in selected UPBJJ
+    const filteredKategoriOptions = computed(() => {
+      if (!filterUpbjj.value) return kategoriList;
+      const set = new Set(data.value.filter(d => d.upbjj === filterUpbjj.value).map(d => d.kategori));
+      return kategoriList.filter(k => set.has(k));
+    });
+
+    // FILTERED + SORTED DATA — computed once, no re-compute needed by Vue's reactivity
+    const filteredData = computed(() => {
+      let list = data.value;
+
+      if (filterUpbjj.value)    list = list.filter(d => d.upbjj === filterUpbjj.value);
+      if (filterKategori.value) list = list.filter(d => d.kategori === filterKategori.value);
+      if (searchQuery.value)    list = list.filter(d =>
+        d.judul.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        d.kode.toLowerCase().includes(searchQuery.value.toLowerCase())
+      );
+      if (filterKosongOnly.value) list = list.filter(d => d.qty === 0);
+      else if (filterReorder.value) list = list.filter(d => d.qty < d.safety);
+
+      list = [...list].sort((a, b) => {
+        let va = a[sortKey.value], vb = b[sortKey.value];
+        if (typeof va === 'string') va = va.toLowerCase(), vb = vb.toLowerCase();
+        if (va < vb) return sortDir.value === 'asc' ? -1 : 1;
+        if (va > vb) return sortDir.value === 'asc' ? 1 : -1;
+        return 0;
+      });
+      return list;
+    });
+
+    function setSort(key, dir) { sortKey.value = key; sortDir.value = dir; }
+
+    function resetFilter() {
+      filterUpbjj.value = '';
+      filterKategori.value = '';
+      searchQuery.value = '';
+      filterReorder.value = false;
+      filterKosongOnly.value = false;
+      sortKey.value = 'judul';
+      sortDir.value = 'asc';
+    }
+
+    // MODAL
+    function openAddModal() {
+      editMode.value = false;
+      form.value = emptyForm();
+      errors.value = {};
+      showModal.value = true;
+    }
+    function openEditModal(item) {
+      editMode.value = true;
+      editId.value = item.id;
+      form.value = {...item};
+      errors.value = {};
+      showModal.value = true;
+    }
+    function closeModal() { showModal.value = false; }
+
+    // VALIDATION
+    function validate() {
+      const e = {};
+      if (!form.value.kode.trim()) e.kode = 'Kode MK wajib diisi';
+      if (!form.value.judul.trim()) e.judul = 'Nama mata kuliah wajib diisi';
+      if (!form.value.kategori) e.kategori = 'Pilih kategori';
+      if (!form.value.upbjj) e.upbjj = 'Pilih UT-Daerah';
+      if (!form.value.lokasiRak.trim()) e.lokasiRak = 'Lokasi rak wajib diisi';
+      if (form.value.qty === '' || form.value.qty < 0) e.qty = 'Stok tidak boleh negatif';
+      if (form.value.safety === '' || form.value.safety < 0) e.safety = 'Safety stock tidak boleh negatif';
+      errors.value = e;
+      return Object.keys(e).length === 0;
+    }
+
+    function submitForm() {
+      if (!validate()) return;
+      if (editMode.value) {
+        const idx = data.value.findIndex(d => d.id === editId.value);
+        if (idx !== -1) data.value[idx] = { ...form.value, id: editId.value };
+      } else {
+        data.value.push({ ...form.value, id: nextId.value++ });
+      }
+      closeModal();
+    }
+
+    function deleteItem(id) {
+      if (confirm('Yakin ingin menghapus item ini?')) {
+        data.value = data.value.filter(d => d.id !== id);
+      }
+    }
+
+    return {
+      data, clock,
+      filterUpbjj, filterKategori, searchQuery, filterReorder, filterKosongOnly,
+      sortKey, sortDir,
+      upbjjList, kategoriList,
+      filteredKategoriOptions, filteredData,
+      countAman, countMenipis, countKosong,
+      setSort, resetFilter,
+      showModal, editMode, form, errors,
+      openAddModal, openEditModal, closeModal, submitForm, deleteItem,
+      statusClass, statusLabel, statusIcon,
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
